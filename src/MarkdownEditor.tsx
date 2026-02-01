@@ -308,7 +308,7 @@ export default function MarkdownEditor() {
           />
         </div>
         {showDebug && (
-          <div className="debug-panel">
+          <div className="debug-panel" role="region" aria-label="Debug Panel">
             <div className="debug-header">Debug: Parsed HTML Output</div>
             <pre className="debug-content">{html}</pre>
           </div>
