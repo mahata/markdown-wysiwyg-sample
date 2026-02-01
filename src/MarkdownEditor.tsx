@@ -282,6 +282,7 @@ export default function MarkdownEditor() {
             onClick={() => setShowDebug(!showDebug)}
             className="debug-toggle-button"
             title={showDebug ? 'Hide debug panel' : 'Show debug panel'}
+            aria-label="Toggle debug panel"
           >
             {showDebug ? 'Hide Debug' : 'Show Debug'}
           </button>
