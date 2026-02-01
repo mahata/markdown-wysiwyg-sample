@@ -290,10 +290,6 @@
 
 /* Responsive design for small screens */
 @media (max-width: 768px) {
-  .editor-container {
-    flex-direction: column;
-  }
-
   .debug-panel {
     flex: 0 0 35%;
   }
