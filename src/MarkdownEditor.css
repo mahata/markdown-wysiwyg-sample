@@ -20,7 +20,14 @@
   margin: 0;
 }
 
-.save-button {
+.header-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.save-button,
+.debug-toggle-button {
   padding: 0.5rem 1rem;
   background-color: #007bff;
   color: white;
@@ -32,21 +39,25 @@
   transition: background-color 0.2s;
 }
 
-.save-button:hover {
+.save-button:hover,
+.debug-toggle-button:hover {
   background-color: #0056b3;
 }
 
-.save-button:active {
+.save-button:active,
+.debug-toggle-button:active {
   background-color: #004085;
 }
 
 .editor-container {
   flex: 1;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .editor-surface {
-  height: 100%;
+  flex: 1;
   overflow: auto;
   background-color: #fafafa;
   padding: 2rem;
@@ -190,6 +201,41 @@
   font-style: italic;
 }
 
+/* Debug Panel Styles */
+.debug-panel {
+  flex: 0 0 40%;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #ddd;
+  background-color: #f9f9f9;
+  overflow: hidden;
+}
+
+.debug-header {
+  padding: 0.75rem 1rem;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ddd;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.debug-content {
+  flex: 1;
+  margin: 0;
+  padding: 1rem;
+  overflow: auto;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  background-color: #fafafa;
+  color: #333;
+  border: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  tab-size: 2;
+}
+
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .editor-header {
@@ -223,5 +269,36 @@
 
   .markdown-surface hr {
     border-top-color: #333;
+  }
+
+  .debug-panel {
+    background-color: #252525;
+    border-top-color: #333;
+  }
+
+  .debug-header {
+    background-color: #2d2d2d;
+    border-bottom-color: #333;
+    color: #e0e0e0;
+  }
+
+  .debug-content {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+  }
+}
+
+/* Responsive design for small screens */
+@media (max-width: 768px) {
+  .editor-container {
+    flex-direction: column;
+  }
+
+  .debug-panel {
+    flex: 0 0 35%;
+  }
+
+  .editor-surface {
+    flex: 1;
   }
 }

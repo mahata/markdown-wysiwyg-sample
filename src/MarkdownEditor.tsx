@@ -210,6 +210,7 @@ function insertTextAtCursor(text: string) {
 
 export default function MarkdownEditor() {
   const [markdown, setMarkdown] = useState('');
+  const [showDebug, setShowDebug] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
 
   const html = useMemo(() => {
@@ -276,9 +277,18 @@ export default function MarkdownEditor() {
     <div className="markdown-editor">
       <header className="editor-header">
         <h1>Markdown WYSIWYG Editor</h1>
-        <button onClick={handleSave} className="save-button">
-          Save Markdown
-        </button>
+        <div className="header-buttons">
+          <button
+            onClick={() => setShowDebug(!showDebug)}
+            className="debug-toggle-button"
+            title={showDebug ? 'Hide debug panel' : 'Show debug panel'}
+          >
+            {showDebug ? 'Hide Debug' : 'Show Debug'}
+          </button>
+          <button onClick={handleSave} className="save-button">
+            Save Markdown
+          </button>
+        </div>
       </header>
 
       <div className="editor-container">
@@ -297,6 +307,12 @@ export default function MarkdownEditor() {
             onPaste={handlePaste}
           />
         </div>
+        {showDebug && (
+          <div className="debug-panel">
+            <div className="debug-header">Debug: Parsed HTML Output</div>
+            <pre className="debug-content">{html}</pre>
+          </div>
+        )}
       </div>
     </div>
   );
