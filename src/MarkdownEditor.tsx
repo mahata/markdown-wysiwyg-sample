@@ -208,10 +208,73 @@ function insertTextAtCursor(text: string) {
   selection.addRange(range);
 }
 
+function moveCaretAfterNode(node: Node) {
+  const selection = window.getSelection();
+  if (!selection) {
+    return;
+  }
+
+  const parent = node.parentNode;
+  if (!parent) {
+    return;
+  }
+
+  let targetTextNode: Text | null = null;
+  const nextSibling = node.nextSibling;
+
+  if (nextSibling && nextSibling.nodeType === Node.TEXT_NODE) {
+    targetTextNode = nextSibling as Text;
+  } else {
+    targetTextNode = document.createTextNode('');
+    if (nextSibling) {
+      parent.insertBefore(targetTextNode, nextSibling);
+    } else {
+      parent.appendChild(targetTextNode);
+    }
+  }
+
+  const range = document.createRange();
+  range.setStart(targetTextNode, 0);
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function isInlineBoundaryTag(tagName: string): boolean {
+  return tagName === 'strong' || tagName === 'em' || tagName === 'code';
+}
+
+function getInlineBoundaryAtCaret(range: Range): HTMLElement | null {
+  const container = range.startContainer;
+  if (container.nodeType === Node.TEXT_NODE) {
+    const textNode = container as Text;
+    const parent = textNode.parentElement;
+    if (!parent) {
+      return null;
+    }
+    if (!isInlineBoundaryTag(parent.tagName.toLowerCase())) {
+      return null;
+    }
+    const textLength = textNode.textContent?.length ?? 0;
+    return range.startOffset === textLength ? parent : null;
+  }
+
+  if (container.nodeType === Node.ELEMENT_NODE) {
+    const element = container as HTMLElement;
+    if (!isInlineBoundaryTag(element.tagName.toLowerCase())) {
+      return null;
+    }
+    return range.startOffset === element.childNodes.length ? element : null;
+  }
+
+  return null;
+}
+
 export default function MarkdownEditor() {
   const [markdown, setMarkdown] = useState('');
   const [showDebug, setShowDebug] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
+  const pendingInlineExitRef = useRef<{ element: HTMLElement; length: number } | null>(null);
 
   const html = useMemo(() => {
     if (markdown.trim() === '') {
@@ -241,6 +304,44 @@ export default function MarkdownEditor() {
     if (!editor) {
       return;
     }
+
+    const pending = pendingInlineExitRef.current;
+    if (pending) {
+      const { element, length } = pending;
+      if (element.isConnected) {
+        const fullText = element.textContent ?? '';
+        if (fullText.length > length) {
+          const head = fullText.slice(0, length);
+          const tail = fullText.slice(length);
+          element.textContent = head;
+          const nextSibling = element.nextSibling;
+          if (nextSibling && nextSibling.nodeType === Node.TEXT_NODE) {
+            nextSibling.textContent = `${tail}${nextSibling.textContent ?? ''}`;
+            const range = document.createRange();
+            const selection = window.getSelection();
+            if (selection) {
+              range.setStart(nextSibling, tail.length);
+              range.collapse(true);
+              selection.removeAllRanges();
+              selection.addRange(range);
+            }
+          } else {
+            const textNode = document.createTextNode(tail);
+            element.after(textNode);
+            const range = document.createRange();
+            const selection = window.getSelection();
+            if (selection) {
+              range.setStart(textNode, tail.length);
+              range.collapse(true);
+              selection.removeAllRanges();
+              selection.addRange(range);
+            }
+          }
+        }
+      }
+      pendingInlineExitRef.current = null;
+    }
+
     const newMarkdown = serializeMarkdownFromDom(editor);
     setMarkdown((prev) => (prev === newMarkdown ? prev : newMarkdown));
   }, []);
@@ -251,6 +352,27 @@ export default function MarkdownEditor() {
       e.preventDefault();
       insertTextAtCursor('  ');
       handleInput();
+    }
+
+    if (e.key === 'ArrowRight') {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) {
+        return;
+      }
+      const range = selection.getRangeAt(0);
+      if (!range.collapsed) {
+        return;
+      }
+      const boundaryElement = getInlineBoundaryAtCaret(range);
+      if (!boundaryElement) {
+        return;
+      }
+      pendingInlineExitRef.current = {
+        element: boundaryElement,
+        length: boundaryElement.textContent?.length ?? 0,
+      };
+      e.preventDefault();
+      moveCaretAfterNode(boundaryElement);
     }
   }, [handleInput]);
 
