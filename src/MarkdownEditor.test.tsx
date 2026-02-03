@@ -1,29 +1,15 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import MarkdownEditor from './MarkdownEditor';
 
 describe('MarkdownEditor - Typing with ArrowRight', () => {
-  let container: HTMLElement;
-
-  beforeEach(() => {
-    const { container: c } = render(<MarkdownEditor />);
-    container = c;
-  });
-
-  afterEach(() => {
-    container = null as any;
-  });
-
-  const getEditor = () => {
-    const editor = container.querySelector('[contenteditable="true"]') as HTMLDivElement;
-    if (!editor) throw new Error('Editor not found');
-    return editor;
-  };
-
   it('should place text after bold when typing, then ArrowRight, then typing', async () => {
-    const editor = getEditor();
+    render(<MarkdownEditor />);
     const user = userEvent.setup();
+
+    // Get the contenteditable editor
+    const editor = screen.getByRole('textbox') as HTMLDivElement;
 
     editor.focus();
     await user.type(editor, '**abc**');
