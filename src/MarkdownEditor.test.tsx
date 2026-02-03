@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import MarkdownEditor from './MarkdownEditor';
 
 describe('MarkdownEditor - Typing with ArrowRight', () => {
@@ -9,10 +9,6 @@ describe('MarkdownEditor - Typing with ArrowRight', () => {
   beforeEach(() => {
     const { container: c } = render(<MarkdownEditor />);
     container = c;
-  });
-
-  afterEach(() => {
-    container = null as any;
   });
 
   const getEditor = () => {
