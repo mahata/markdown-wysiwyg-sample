@@ -10,7 +10,7 @@ describe('MarkdownEditor - Typing with ArrowRight', () => {
 
     // Get the contenteditable editor
     const editor = screen.getByRole('textbox') as HTMLDivElement;
-    
+
     editor.focus();
     await user.type(editor, '**abc**');
     await user.keyboard('{ArrowRight}');
